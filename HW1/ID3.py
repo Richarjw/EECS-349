@@ -2,7 +2,7 @@ from node import Node
 from parse import parse
 import math
 
-Data = parse("house_votes_84.data")
+Data = parse("house_votes_84.data")  
 
 def ID3(examples, default):
   '''
@@ -19,7 +19,7 @@ def ID3(examples, default):
          
 def prune(node, examples):
   '''
-  Takes in a trained tree and a validation set of examples.  Prunes nodes in order
+  Takes in a trained tree and a validation set\ of examples.  Prunes nodes in order
   to improve accuracy on the validation data; the precise pruning strategy is up to you.
   '''
 
