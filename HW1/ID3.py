@@ -2,7 +2,7 @@ from node import Node
 from parse import parse
 import math
 
-Data = parse("/Users/Nico/Documents/GitHub/EECS-349/house_votes_84.data")
+Data = parse("house_votes_84.data")
 
 def ID3(examples, default):
   '''
@@ -39,3 +39,13 @@ def evaluate(node, example):
 x = Node()
 x.children = {"billy","joe"}
 
+def mode(examples):
+	num_rep = 0
+	num_dem = 0
+	for item in examples:
+		if item['Class'] == 'democrat':
+			num_dem += 1
+		elif item['Class'] == 'republican':
+			num_rep += 1
+	
+	return 'republican' if num_rep > num_rep else 'democrat'
