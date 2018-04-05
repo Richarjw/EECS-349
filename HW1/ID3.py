@@ -39,14 +39,52 @@ def evaluate(node, example):
 x = Node()
 x.children = {"billy","joe"}
 
-def count_class(examples,class_name):
+def entropy(examples,name):
+	''' 
+		given a name of a key in an entry in the examples list, return the entropy (assuming binary values)
+		using formula H(Y) = - Sum ( pk * log_2(pk))
 	'''
-	counts the numebr of class in example space given class_name (this is for 
-	counting dems or republicans) not for attributes
+	num_yes = float(count_class(examples, name, 'y'))
+	num_no = float(count_class(examples, name, 'n')) #need to consider ? here
+	total = num_yes + num_no
+	prob_yes = num_yes/total
+	prob_no = num_no/total
+	
+	#where do we consider ?
+	no_given_dem = compute_conditional_prob(examples, name, 'n','democrat')
+	no_given_rep = compute_conditional_prob(examples, name,'n','republican')
+	Hn = -no_given_dem - no_given_rep
+	
+	yes_given_dem = compute_conditional_prob(examples, name, 'y','democrat')
+	yes_given_rep = compute_conditional_prob(examples, name,'y','republican')
+	Hy = -yes_given_dem - yes_given_rep
+	
+	
+	H = (-prob_no*Hn - prob_yes*Hy)
+	return H
+
+def compute_conditional_prob(examples, attribute_name, attribute_type, class_name):
+	'''
+		computes probability of given attribute/attribute_type pair given its of a certain class
+		name (rep or dem)
+	'''
+	numerator = 0
+	total = 0 
+	
+	for item in examples:
+		total += 1
+		if (item[attribute_name] == attribute_type and item['Class'] == class_name):
+			numerator += 1
+	
+	return numerator / total
+
+def count_class(examples,class_name, class_type):
+	'''
+	counts the numebr of class_types in example space given class_name.
 	'''
 	count = 0 
 	for item in examples:
-		if (item['Class'] == class_name):
+		if (item[class_name] == class_type):
 			count += 1
 	return count
 	
