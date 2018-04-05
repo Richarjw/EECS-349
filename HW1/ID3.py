@@ -39,7 +39,7 @@ def evaluate(node, example):
 x = Node()
 x.children = {"billy","joe"}
 
-def entropy(examples,name):
+def info_gain(examples,name):
 	''' 
 		given a name of a key in an entry in the examples list, return the entropy (assuming binary values)
 		using formula H(Y) = - Sum ( pk * log_2(pk))
@@ -60,8 +60,8 @@ def entropy(examples,name):
 	Hy = -yes_given_dem - yes_given_rep
 	
 	
-	H = (-prob_no*Hn - prob_yes*Hy)
-	return H
+	IG = (-prob_no*Hn - prob_yes*Hy) # only return this not prior, going to minimize this number
+	return IG
 
 def compute_conditional_prob(examples, attribute_name, attribute_type, class_name):
 	'''
