@@ -59,7 +59,7 @@ def info_gain(examples,name):
 	yes_given_rep = compute_conditional_prob(examples, name,'y','republican')
 	Hy = -yes_given_dem - yes_given_rep
 	
-	
+	print Hn, Hy
 	IG = (-prob_no*Hn - prob_yes*Hy) # only return this not prior, going to minimize this number
 	return IG
 
@@ -76,7 +76,7 @@ def compute_conditional_prob(examples, attribute_name, attribute_type, class_nam
 		if (item[attribute_name] == attribute_type and item['Class'] == class_name):
 			numerator += 1
 	
-	return numerator / total
+	return float(numerator) / float(total)
 
 def count_class(examples,class_name, class_type):
 	'''
