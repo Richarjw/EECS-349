@@ -39,6 +39,17 @@ def evaluate(node, example):
 x = Node()
 x.children = {"billy","joe"}
 
+def count_class(examples,class_name):
+	'''
+	counts the numebr of class in example space given class_name (this is for 
+	counting dems or republicans) not for attributes
+	'''
+	count = 0 
+	for item in examples:
+		if (item['Class'] == class_name):
+			count += 1
+	return count
+	
 def mode(examples):
 	num_rep = 0
 	num_dem = 0
