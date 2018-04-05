@@ -36,9 +36,6 @@ def evaluate(node, example):
   assigns to the example.
   '''
 
-x = Node()
-x.children = {"billy","joe"}
-
 def info_gain(examples,name):
 	''' 
 		given a name of a key in an entry in the examples list, return the entropy (assuming binary values)
@@ -59,7 +56,6 @@ def info_gain(examples,name):
 	yes_given_rep = compute_conditional_prob(examples, name,'y','republican')
 	Hy = -yes_given_dem - yes_given_rep
 	
-	print Hn, Hy
 	IG = (-prob_no*Hn - prob_yes*Hy) # only return this not prior, going to minimize this number
 	return IG
 
