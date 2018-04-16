@@ -123,18 +123,21 @@ def prune(node, examples):
   Takes in a trained tree and a validation set of examples.  Prunes nodes in order
   to improve accuracy on the validation data; the precise pruning strategy is up to you.
   '''
-  y_true = []
-  y_pred = []
-  for example in examples:
-      y_true.append(example['Class'])
-      y_pred.append(evaluate(example))
-
+ 
 
 def test(node, examples):
   '''
   Takes in a trained tree and a test set of examples.  Returns the accuracy (fraction
   of examples the tree classifies correctly).
   '''
+  total = len(examples)
+  correct_count = 0
+  for example in examples:
+      y_true = example['Class']
+      y_pred = evaluate(node,example)
+      if y_true == y_pred:
+          correct_count += 1
+  return float(correct_count)/float(total)
 
 
 def evaluate(node,example):
