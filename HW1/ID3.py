@@ -119,11 +119,13 @@ def ID3(examples,default="Hell if I know"):
 
              
 def prune(node, examples):
-  '''
-  Takes in a trained tree and a validation set of examples.  Prunes nodes in order
-  to improve accuracy on the validation data; the precise pruning strategy is up to you.
-  '''
- 
+    '''
+    Takes in a trained tree and a validation set of examples.  Prunes nodes in order
+    to improve accuracy on the validation data; the precise pruning strategy is up to you.
+    '''
+    best = test(node,examples)
+    
+    return node
 
 def test(node, examples):
   '''
@@ -151,8 +153,8 @@ def evaluate(node,example):
   attribute = node.attribute
   example_x = example[attribute]
   return evaluate(node.children[example_x],example)
-  
-  
+
+
   
 
 """
