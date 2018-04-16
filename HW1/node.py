@@ -9,3 +9,6 @@ class Node:
     
     def add_child(self, label, node):
         self.children[label]=node
+
+    def depth(self,level):
+        self.depth = level

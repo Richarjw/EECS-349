@@ -1,9 +1,10 @@
 from node import Node
 from parse import parse
-import math
-
+import copy
 
 Data = parse("house_votes_84.data")  
+
+
 
 def count_class(examples,class_name, class_type):
 	'''
@@ -15,6 +16,9 @@ def count_class(examples,class_name, class_type):
 			count += 1
 	return count
 
+
+
+
 def mode(examples):
 	num_rep = 0
 	num_dem = 0
@@ -25,6 +29,9 @@ def mode(examples):
 			num_rep += 1
 	
 	return 'republican' if num_rep > num_dem else 'democrat'
+
+
+
 
 def compute_conditional_prob(examples, attribute_name, attribute_type, class_name):
 	'''
@@ -40,6 +47,8 @@ def compute_conditional_prob(examples, attribute_name, attribute_type, class_nam
 			numerator += 1
 	
 	return float(numerator) / float(total)
+
+
 
 def entropy(examples,name):
     ''' 
@@ -73,6 +82,8 @@ def entropy(examples,name):
     return IG
 
 
+
+
 def CheckHomog(examples):
     classes = []
     for dictionary in examples:
@@ -83,11 +94,15 @@ def CheckHomog(examples):
     return True
 
 
+
 def ChooseAttribute(examples):
     keys = examples[0].keys()
     keys.remove('Class')
     scores = [entropy(examples,key) for key in keys]
     return keys[scores.index(min(scores))]
+
+
+
 
 def Unique(examples,label):
     classes = []
@@ -96,7 +111,10 @@ def Unique(examples,label):
             classes.append(example[label]) 
     return classes
 
-def ID3(examples,default="Hell if I know"):
+
+
+
+def ID3(examples,default=None):
   '''
   Takes in an array of examples, and returns a tree (an instance of Node) 
   trained on the examples.  Each example is a dictionary of attribute:value pairs,
@@ -118,14 +136,48 @@ def ID3(examples,default="Hell if I know"):
   return t
 
              
+
+
 def prune(node, examples):
     '''
     Takes in a trained tree and a validation set of examples.  Prunes nodes in order
     to improve accuracy on the validation data; the precise pruning strategy is up to you.
     '''
-    best = test(node,examples)
+
+    current_score = test(node,examples)
+    depth = deepest_point(node)
+    improvement = 0
+    while improvement >=0:
+        new_tree = copy.deepcopy(node)
     
-    return node
+        
+
+            
+def trimmer(node,max_depth):
+    if node.depth == max_depth:
+        node.children = {}
+    else:
+        for child in node.children:
+            trimmer(node.children[child],max_depth)
+
+
+def label_depth(node,track=0):
+    node.depth = track
+    if node.children != {}:
+        for child in node.children:
+            label_depth(node.children[child],track+1)
+    
+    
+
+def deepest_point(node,track=0):
+    if node.children == {}:
+        return track
+    track+=1
+    branches = [deepest_point(node.children[child],track) for child in node.children]
+    return max(branches)
+
+
+
 
 def test(node, examples):
   '''
@@ -142,12 +194,14 @@ def test(node, examples):
   return float(correct_count)/float(total)
 
 
+
+
 def evaluate(node,example):
   '''
   Takes in a tree and one example.  Returns the Class value that the tree
   assigns to the example.
   '''
-  if node.children=={} or example[node.attribute] not in node.children:
+  if node.children==None or example[node.attribute] not in node.children:
       return node.Ylabel
   
   attribute = node.attribute
