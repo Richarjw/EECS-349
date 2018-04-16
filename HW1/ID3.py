@@ -42,28 +42,35 @@ def compute_conditional_prob(examples, attribute_name, attribute_type, class_nam
 	return float(numerator) / float(total)
 
 def entropy(examples,name):
-	''' 
-		given a name of a key in an entry in the examples list, return the entropy (assuming binary values)
-		using formula H(Y) = - Sum ( pk * log_2(pk))
-	'''
+    ''' 
+    given a name of a key in an entry in the examples list, return the entropy (assuming binary values)
+    using formula H(Y) = - Sum ( pk * log_2(pk))
+    '''
 
-	num_yes = float(count_class(examples, name, 'y'))
-	num_no = float(count_class(examples, name, 'n')) #need to consider ? here
-	total = num_yes + num_no
-	prob_yes = float(num_yes/total)
-	prob_no = float(num_no/total)
+    num_yes = float(count_class(examples, name, 'y'))
+    num_no = float(count_class(examples, name, 'n'))
+    num_q = float(count_class(examples, name, '?'))
+    total = num_yes + num_no + num_q
+    
+    prob_yes = float(num_yes/total)
+    prob_no = float(num_no/total)
+    prob_q = float(num_q/total)
+    
+    #where do we consider ?
+    no_given_dem = compute_conditional_prob(examples, name, 'n','democrat')
+    no_given_rep = compute_conditional_prob(examples, name,'n','republican')
+    Hn = -no_given_dem - no_given_rep
 	
-	#where do we consider ?
-	no_given_dem = compute_conditional_prob(examples, name, 'n','democrat')
-	no_given_rep = compute_conditional_prob(examples, name,'n','republican')
-	Hn = -no_given_dem - no_given_rep
+    yes_given_dem = compute_conditional_prob(examples, name, 'y','democrat')
+    yes_given_rep = compute_conditional_prob(examples, name,'y','republican')
+    Hy = -yes_given_dem - yes_given_rep
 	
-	yes_given_dem = compute_conditional_prob(examples, name, 'y','democrat')
-	yes_given_rep = compute_conditional_prob(examples, name,'y','republican')
-	Hy = -yes_given_dem - yes_given_rep
-	
-	IG = (-prob_no*Hn - prob_yes*Hy) # only return this not prior, going to minimize this number
-	return IG
+    q_given_dem = compute_conditional_prob(examples, name,'?','democrat')
+    q_given_rep = compute_conditional_prob(examples, name,'?','republican')
+    Hq = -q_given_dem - q_given_rep
+    
+    IG = (-prob_no * Hn - prob_yes * Hy - prob_q * Hq) # only return this not prior, going to minimize this number
+    return IG
 
 
 def CheckHomog(examples):
@@ -89,29 +96,26 @@ def Unique(examples,label):
             classes.append(example[label]) 
     return classes
 
-def ID3(examples, default):
+def ID3(examples,default="Hell if I know"):
   '''
   Takes in an array of examples, and returns a tree (an instance of Node) 
   trained on the examples.  Each example is a dictionary of attribute:value pairs,
   and the target class variable is a special attribute with the name "Class".
   Any missing attributes are denoted with a value of "?"
   '''
-  if examples == {}:
-      return Node()
-  elif CheckHomog(examples): # Could probably be replaced by if H(S)==0
-      t = Node()
-      t.Ylabel = mode(examples)
-      return t
+  if examples == []:
+      return Node(default)
+  elif CheckHomog(examples):
+      return Node(mode(examples))
   else:
       best = ChooseAttribute(examples)
-      t = Node()
+      t = Node(default)
       t.attribute = best
       for label in Unique(examples,best):
           examples_i = [example for example in examples if example[best]==label]
           subtree = ID3(examples_i,mode(examples))
-          child.label = label
-          t.add_child(child)
-  return t          
+          t.add_child(label,subtree)
+  return t
 
              
 def prune(node, examples):
@@ -133,12 +137,17 @@ def test(node, examples):
   '''
 
 
-def evaluate(node, example):
+def evaluate(node,example):
   '''
   Takes in a tree and one example.  Returns the Class value that the tree
   assigns to the example.
   '''
+  if node.children=={} or example[node.attribute] not in node.children:
+      return node.Ylabel
   
+  attribute = node.attribute
+  example_x = example[attribute]
+  return evaluate(node.children[example_x],example)
   
   
   
