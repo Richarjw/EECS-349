@@ -111,6 +111,11 @@ def Unique(examples,label):
             classes.append(example[label]) 
     return classes
 
+def label_depth(node,track=0):
+    node.depth = track
+    if node.children != {}:
+        for child in node.children:
+            label_depth(node.children[child],track+1)
 
 
 
@@ -133,39 +138,16 @@ def ID3(examples,default=None):
           examples_i = [example for example in examples if example[best]==label]
           subtree = ID3(examples_i,mode(examples))
           t.add_child(label,subtree)
+  label_depth(t)
   return t
 
              
-
-
-def prune(node, examples):
-    '''
-    Takes in a trained tree and a validation set of examples.  Prunes nodes in order
-    to improve accuracy on the validation data; the precise pruning strategy is up to you.
-    '''
-
-    current_score = test(node,examples)
-    depth = deepest_point(node)
-    improvement = 0
-    while improvement >=0:
-        new_tree = copy.deepcopy(node)
-    
-        
-
-            
 def trimmer(node,max_depth):
     if node.depth == max_depth:
         node.children = {}
     else:
         for child in node.children:
             trimmer(node.children[child],max_depth)
-
-
-def label_depth(node,track=0):
-    node.depth = track
-    if node.children != {}:
-        for child in node.children:
-            label_depth(node.children[child],track+1)
     
     
 
@@ -176,6 +158,24 @@ def deepest_point(node,track=0):
     branches = [deepest_point(node.children[child],track) for child in node.children]
     return max(branches)
 
+
+def prune(node, examples):
+    '''
+    Takes in a trained tree and a validation set of examples.  Prunes nodes in order
+    to improve accuracy on the validation data; the precise pruning strategy is up to you.
+    '''
+    current_score = test(node,examples)
+    improvement = 0
+    while True:
+        new_tree = copy.deepcopy(node)
+        trimmer(new_tree,deepest_point(node)-1)
+        new_score = test(new_tree,examples)
+        improvement =  new_score - current_score
+        if improvement >= 0:
+            node = new_tree
+        else:
+            break
+    return node
 
 
 
@@ -201,7 +201,7 @@ def evaluate(node,example):
   Takes in a tree and one example.  Returns the Class value that the tree
   assigns to the example.
   '''
-  if node.children==None or example[node.attribute] not in node.children:
+  if node.children=={} or example[node.attribute] not in node.children:
       return node.Ylabel
   
   attribute = node.attribute
