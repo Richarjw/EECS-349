@@ -1,9 +1,10 @@
+import numpy as np
 from node import Node
 from parse import parse
 import copy
 
-Data = parse("house_votes_84.data")  
-
+inFile = "/Users/Nico/Documents/GitHub/EECS-349/HW1/house_votes_84.data"
+Data = parse(inFile)  
 
 
 def count_class(examples,class_name, class_type):
@@ -20,15 +21,15 @@ def count_class(examples,class_name, class_type):
 
 
 def mode(examples):
-	num_rep = 0
-	num_dem = 0
-	for item in examples:
-		if item['Class'] == 'democrat':
-			num_dem += 1
-		elif item['Class'] == 'republican':
-			num_rep += 1
+    unique = {}
+    for item in examples:
+        if item['Class'] not in unique:
+            unique[item['Class']] = 0 #Create dictionary
+
+    for item in examples:
+        unique[item['Class']] += 1
 	
-	return 'republican' if num_rep > num_dem else 'democrat'
+    return max(unique)
 
 
 
@@ -51,35 +52,48 @@ def compute_conditional_prob(examples, attribute_name, attribute_type, class_nam
 
 
 def entropy(examples,name):
-    ''' 
-    given a name of a key in an entry in the examples list, return the entropy (assuming binary values)
-    using formula H(Y) = - Sum ( pk * log_2(pk))
-    '''
 
-    num_yes = float(count_class(examples, name, 'y'))
-    num_no = float(count_class(examples, name, 'n'))
-    num_q = float(count_class(examples, name, '?'))
-    total = num_yes + num_no + num_q
-    
-    prob_yes = float(num_yes/total)
-    prob_no = float(num_no/total)
-    prob_q = float(num_q/total)
-    
-    #where do we consider ?
-    no_given_dem = compute_conditional_prob(examples, name, 'n','democrat')
-    no_given_rep = compute_conditional_prob(examples, name,'n','republican')
-    Hn = -no_given_dem - no_given_rep
-	
-    yes_given_dem = compute_conditional_prob(examples, name, 'y','democrat')
-    yes_given_rep = compute_conditional_prob(examples, name,'y','republican')
-    Hy = -yes_given_dem - yes_given_rep
-	
-    q_given_dem = compute_conditional_prob(examples, name,'?','democrat')
-    q_given_rep = compute_conditional_prob(examples, name,'?','republican')
-    Hq = -q_given_dem - q_given_rep
-    
-    IG = (-prob_no * Hn - prob_yes * Hy - prob_q * Hq) # only return this not prior, going to minimize this number
-    return IG
+    total_tally = 0
+    class_tally = {}
+    for item in examples: #Create dictionary of classes
+        total_tally+=1
+        if item['Class'] not in class_tally:
+            class_tally[item['Class']] = 1 
+        else:
+            class_tally[item['Class']] += 1
+
+    options = {}
+    for item in examples:
+        if item[name] not in options:
+            options[item[name]] = 0
+
+            
+    class_labels = {}
+    for item in examples: #Create dictionary of classes
+        if item['Class'] not in class_labels:
+            class_labels[item['Class']] = copy.copy(options)
+
+
+    for item in examples:
+        class_labels[item['Class']][item[name]] +=1
+
+    name_tally = {}
+    for item in examples: #Create dictionary of classes
+        if item[name] not in name_tally:
+            name_tally[item[name]] = 1 
+        else:
+            name_tally[item[name]] += 1
+
+
+    probs = []
+    for class_label in class_labels:
+        for sub_label in class_labels[class_label]:
+            p_y_x = float(class_labels[class_label][sub_label])/float(total_tally)
+            p_x = float(name_tally[sub_label]) / float(total_tally)
+            if p_y_x > 0:
+                probs.append(p_y_x*np.log2(p_x/p_y_x))
+                
+    return sum(probs)
 
 
 
@@ -151,11 +165,11 @@ def trimmer(node,max_depth):
     
     
 
-def deepest_point(node,track=0):
+def treeSize(node,track=0):
     if node.children == {}:
         return track
     track+=1
-    branches = [deepest_point(node.children[child],track) for child in node.children]
+    branches = [treeSize(node.children[child],track) for child in node.children]
     return max(branches)
 
 
@@ -168,11 +182,11 @@ def prune(node, examples):
     improvement = 0
     while True:
         new_tree = copy.deepcopy(node)
-        trimmer(new_tree,deepest_point(node)-1)
+        trimmer(new_tree,treeSize(node)-1)
         new_score = test(new_tree,examples)
         improvement =  new_score - current_score
-        if improvement >= 0:
-            node = new_tree
+        if improvement > 0:
+            node = copy.deepcopy(new_tree)
         else:
             break
     return node
@@ -207,14 +221,3 @@ def evaluate(node,example):
   attribute = node.attribute
   example_x = example[attribute]
   return evaluate(node.children[example_x],example)
-
-
-  
-
-"""
-Treat Unknown as if it's a whole new attribute
-
-test case will involve a new category for an attribute not part of training data
-"""
-
-	
