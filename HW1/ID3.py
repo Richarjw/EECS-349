@@ -3,9 +3,6 @@ from node import Node
 from parse import parse
 import copy
 
-inFile = "/Users/Nico/Documents/GitHub/EECS-349/HW1/house_votes_84.data"
-Data = parse(inFile)  
-
 
 def count_class(examples,class_name, class_type):
 	'''
