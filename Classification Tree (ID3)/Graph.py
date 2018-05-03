@@ -4,7 +4,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
-inFile = "/Users/Nico/Documents/GitHub/EECS-349/HW1/house_votes_84.data"
+inFile = "house_votes_84.data"
 data = parse(inFile)
 
 """
